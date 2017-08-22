@@ -1,5 +1,5 @@
-#ifndef HEADER_LFHASH
-#define HEADER_LFHASH
+#ifndef HEADER_ATOMICHASH
+#define HEADER_ATOMICHASH
 
 #ifdef __cplusplus
 extern "C" {
