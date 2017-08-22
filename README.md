@@ -1,7 +1,7 @@
 # atomic_hashtable
 Fast movement for free and writeable, and read without locking while multithreading purposes
 
-### How does your atomic_hashtable work?
+### How does atomic_hashtable work?
 - it is traveling around the buffer(s), each buffer has it own metadata for atomic counter of read and write permission without affecting other buffer's transaction. Meanwhile, all buffer are controlled by parent to own an accessing atomic counter in order to controlled the memory relocation only. 
 
 ### Target Project
@@ -35,8 +35,6 @@ Fast movement for free and writeable, and read without locking while multithread
 * arg2= the allocated value to replace
 * return previous held value, return NULL if cannot find
 
-
-
 ###### void* __atomic_hash_pop(__atomic_hash *, HashKey );
 * arg0=The name hashtable
 * arg1=the key in string
@@ -50,3 +48,6 @@ Fast movement for free and writeable, and read without locking while multithread
 
 ###### void __atomic_hash_destroy(__atomic_hash *);
 * arg0=The name hashtable
+
+### Simple Right?! Enjoy your look free travelling!!
+
