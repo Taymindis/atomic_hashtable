@@ -20,6 +20,13 @@ static void* readObject(void *origin) {
     Object *a = malloc(sizeof(Object));
 
     memcpy(a, origin, sizeof(Object));
+
+    size_t sz = (strlen(((Object*)origin)->name) + 1) * sizeof(char);
+
+    a->name = malloc(sz);
+    memcpy(a->name, ((Object*)origin)->name, sz);
+
+
     return a;
 }
 
@@ -56,34 +63,43 @@ void *myThreadFun(void *vargp)
     atomic_key_name = randr(0, 2000000);
 
 
-    char str[30];
+    char str[10];
     sprintf(str, "%d", atomic_key_name);
 
     Object *o = (Object*)malloc(sizeof(Object));
-    o->name = str;
+    o->name = malloc(10*sizeof(char));
+    memcpy(o->name, str, 10 * sizeof(char));
     // printf("hash is %lu, and resize is %zu \n", hash(str), my_hashtable->resize );
     __atomic_hash_put(my_hashtable, str, o);
 
-
     o = (Object*) __atomic_hash_read(my_hashtable, str);
     if (o) {
-        // printf("%s\n", o->name);
+        printf("%s\n", o->name);
+        free(o->name);
         free(o);
-    }
+    } 
 
-    Object *s_st, *old_v ;
-    s_st = (Object*)malloc(sizeof(Object));
-    char *str2 = malloc(30 * sizeof(char));
-    memcpy(str2, "replacement", 12);
-    s_st->name = str;
-    old_v = __atomic_hash_replace(my_hashtable, str, s_st);
-    if (old_v) {
-        free(old_v);
+     o = (Object*) __atomic_hash_get(my_hashtable, str);
+    if (!o) {
+        // printf("%s\n", o->name);
+        printf("%s\n", "not found");
     } else {
-        free(s_st);
+        // printf("%s\n", o->name);
     }
 
-    free(str2);
+    // Object *s_st, *old_v ;
+    // s_st = (Object*)malloc(sizeof(Object));
+    // char *str2 = malloc(30 * sizeof(char));
+    // memcpy(str2, "replacement", 12);
+    // s_st->name = str;
+    // old_v = __atomic_hash_replace(my_hashtable, str, s_st);
+    // if (old_v) {
+    //     free(old_v);
+    // } else {
+    //     free(s_st);
+    // }
+
+    // free(str2);
 
     // s_st = (Object*) __atomic_hash_pop(my_hashtable, str);
     // if (s_st) {

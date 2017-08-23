@@ -48,6 +48,7 @@ __atomic_hash* __atomic_hash_init(size_t , atomic_hash_read_node_fn , atomic_has
 int __atomic_hash_put(__atomic_hash *, HashKey , void *);
 void* __atomic_hash_replace(__atomic_hash *, HashKey , void *);
 void* __atomic_hash_pop(__atomic_hash *, HashKey );
+void* __atomic_hash_get(__atomic_hash *, HashKey );
 void* __atomic_hash_read(__atomic_hash *, HashKey );
 void __atomic_hash_destroy(__atomic_hash *);
 

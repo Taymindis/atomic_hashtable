@@ -364,6 +364,40 @@ SUCCESS:
     return return_;
 }
 
+/** get is getting the reference pointer from the hashtable, it is not good for multi concurrent write 
+while other thread is free the field value, should use read **/
+void*
+__atomic_hash_get(__atomic_hash *atom_hash, HashKey key_) {
+    void * return_ = NULL;
+    size_t keyLen = strlen(key_);
+    size_t total_size = atom_hash->total_size;
+
+    while (__atomic_fetch_add(&atom_hash->accessing_counter, 2, __ATOMIC_ACQUIRE) % 2 != 0 ) {
+        __atomic_fetch_sub(&atom_hash->accessing_counter, 2,  __ATOMIC_RELEASE);
+    }
+
+    struct __atomic_node_s *buffer = atom_hash->node_buf + (get_hash_index(key_));
+
+    for (size_t i = 0; i < total_size ; i++) {
+        // Use even number to prevent conflict issue with pop, even number means popable
+        if (__atomic_fetch_add(&buffer->reading_counter, 2, __ATOMIC_ACQUIRE) % 2 == 0 &&
+                buffer->key && strncmp(key_, buffer->key,  keyLen) == 0) {
+            // printf("loop index %zu\n", i );
+            goto SUCCESS;
+        }
+        __atomic_fetch_sub(&buffer->reading_counter, 2,  __ATOMIC_RELEASE); // release read back
+        buffer = buffer->next;
+    }
+    __atomic_fetch_sub(&atom_hash->accessing_counter, 2,  __ATOMIC_RELEASE); // release access back
+    return return_;
+SUCCESS:
+    return_ = buffer->val;
+    __atomic_fetch_sub(&buffer->reading_counter, 2,  __ATOMIC_RELEASE); // release read back
+    __atomic_fetch_sub(&atom_hash->accessing_counter, 2,  __ATOMIC_RELEASE); // release access back
+
+    return return_;
+}
+
 void*
 __atomic_hash_read(__atomic_hash *atom_hash, HashKey key_) {
     void * return_ = NULL;

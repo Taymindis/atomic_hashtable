@@ -47,7 +47,8 @@ __atomic_hash_n* __atomic_hash_n_init(size_t , atomic_hash_n_read_node_fn , atom
 int __atomic_hash_n_put(__atomic_hash_n *, atom_NumKey , void *);
 void* __atomic_hash_n_replace(__atomic_hash_n *, atom_NumKey , void *);
 void* __atomic_hash_n_pop(__atomic_hash_n *, atom_NumKey );
-void* __atomic_hash_n_read(__atomic_hash_n *, atom_NumKey );
+void* __atomic_hash_n_get(__atomic_hash_n *, atom_NumKey);
+void* __atomic_hash_n_read(__atomic_hash_n *, atom_NumKey);
 void __atomic_hash_n_destroy(__atomic_hash_n *);
 
 #ifdef __cplusplus

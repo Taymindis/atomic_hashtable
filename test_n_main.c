@@ -57,8 +57,15 @@ void *myThreadFun(void *vargp)
 
     o = (Object*) __atomic_hash_n_read(my_hashtable, num_key);
     if (o) {
-        // printf("%s\n", o->name);
+        printf("%lu\n", o->name);
         free(o);
+    }
+
+
+
+    o = (Object*) __atomic_hash_n_get(my_hashtable, num_key);
+    if(!o) {
+        printf("%s\n", "not found");
     }
 
     Object *s_st, *old_v ;
