@@ -80,6 +80,10 @@ __atomic_hash_n_init(size_t hash_size, atomic_hash_n_read_node_fn read_node_fn_,
     if (read_node_fn_ == NULL)
         printf("%s\n", "WARNING:: Must have read function provided to read the value, else do not use read function");
 
+    if (free_node_fn_ == NULL)
+        printf("%s\n", "WARNING:: Must have free node function provided to free the node, else it won't free the value when destroying the hashtable");
+
+
     __atomic_hash_n *atom_hash = __atomic_hash_n_malloc_fn(sizeof(__atomic_hash_n));
 
     if (atom_hash == NULL) return 0;
