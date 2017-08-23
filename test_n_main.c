@@ -85,7 +85,6 @@ void *myThreadFun(void *vargp)
     //     // printf("%s\n", s_st->name);
     //     // printf("%.*s\n", 11, s_st->name);
 
-    //     // free(s_st->name);
     //     free(s_st);
     // } else {
     //     printf("%s\n", "nothing");

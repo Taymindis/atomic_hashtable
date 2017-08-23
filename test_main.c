@@ -13,6 +13,7 @@ typedef struct {
 
 static void freeObject(void *node) {
     // printf("%s\n", "Free from POP");
+    free(((Object*)node)->name);
     free(node);
 }
 
@@ -87,19 +88,18 @@ void *myThreadFun(void *vargp)
         // printf("%s\n", o->name);
     }
 
-    // Object *s_st, *old_v ;
-    // s_st = (Object*)malloc(sizeof(Object));
-    // char *str2 = malloc(30 * sizeof(char));
-    // memcpy(str2, "replacement", 12);
-    // s_st->name = str;
-    // old_v = __atomic_hash_replace(my_hashtable, str, s_st);
-    // if (old_v) {
-    //     free(old_v);
-    // } else {
-    //     free(s_st);
-    // }
-
-    // free(str2);
+    Object *s_st, *old_v ;
+    s_st = (Object*)malloc(sizeof(Object));
+    s_st->name = malloc(10*sizeof(char));
+    memcpy(s_st->name, str, 10 * sizeof(char));
+    old_v = __atomic_hash_replace(my_hashtable, str, s_st);
+    if (old_v) {
+        free(old_v->name);
+        free(old_v);
+    } else {
+        free(s_st->name);
+        free(s_st);
+    }
 
     // s_st = (Object*) __atomic_hash_pop(my_hashtable, str);
     // if (s_st) {
@@ -107,7 +107,7 @@ void *myThreadFun(void *vargp)
     //     // printf("%s\n", s_st->name);
     //     // printf("%.*s\n", 11, s_st->name);
 
-    //     // free(s_st->name);
+    //     free(s_st->name);
     //     free(s_st);
     // } else {
     //     printf("%s\n", "nothing");
