@@ -29,28 +29,42 @@ Fast movement for free and writeable, and read without locking while multithread
 ###### int __atomic_hash_put(__atomic_hash *, HashKey , void *);
 * arg0=The name hashtable
 * arg1=the key in char string
-* arg2= the allocated value 
+* arg2= the pre-allocated value 
 * return 1 if true, 0 if false
 
 ###### void* __atomic_hash_replace(__atomic_hash *, HashKey , void *);
 * arg0=The name hashtable
 * arg1=the key in string
-* arg2= the allocated value to replace
-* return previous held value, return NULL if cannot find
+* arg2= the pre-allocated value to replace
+* return previous held pre-allocated value, return NULL if cannot find
 
 ###### void* __atomic_hash_pop(__atomic_hash *, HashKey );
 * arg0=The name hashtable
 * arg1=the key in string
-* return val if found, else return NULL 
+* return pop out pre-allocated value if found, else return NULL 
 
 ###### void* __atomic_hash_read(__atomic_hash *, HashKey );
 * arg0=The name hashtable
 * arg1=the key in string
-* return duplicated val if found, else return NULL 
+* return duplicated value if found, else return NULL 
 * need to have read function when initializing the atomic_hashtale
 
 ###### void __atomic_hash_destroy(__atomic_hash *);
 * arg0=The name hashtable
 
-### Simple Right?! Enjoy your look free travelling!!
+
+
+### What is pre-allocated value in the readme
+* it means the value must allocated memory before push. The buffer will keeping the same value until you pop out.
+
+
+### what is atomic_hash_read_node_fn in the readme
+* it mainly for __atomic_hash_read function, it will trigger the atomic_hash_read_node_fn to duplicate the new node, the current still remain on buffer. 
+* see test_main.c for example.
+
+### what is atomic_hash_free_node_fn in the readme
+* it mainly for __atomic_hash_destroy function, it will iterate the buffer and trigger the atomic_hash_free_node_fn when destroying the node.
+* see test_main.c for example. 
+
+### Simple Right?! Enjoy your lock free travelling!!
 
