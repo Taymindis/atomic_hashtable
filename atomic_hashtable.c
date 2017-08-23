@@ -19,7 +19,7 @@ int __atomic_hash_realloc_buffer_(__atomic_hash *atom_hash);
 static unsigned long hash(unsigned char *str);
 
 
-#define get_hash_index(s) (hash((unsigned char*)s)%atom_hash->modulus_size)*atom_hash->resize
+#define get_hash_index(s) hash((unsigned char*)s)%atom_hash->total_size
 
 
 static atomic_hash_malloc_fn __atomic_hash_malloc_fn = malloc;
@@ -93,8 +93,7 @@ __atomic_hash_init(size_t hash_size, atomic_hash_read_node_fn read_node_fn_, ato
     atom_hash->total_size = hash_size;
 
     // for assigning const val, this is one time intial only
-    *(size_t *)&atom_hash->modulus_size = hash_size;
-    // hash_size += 3; // give some padding
+    // *(size_t *)&atom_hash->modulus_size = hash_size;
 
     /** Pre-allocate all nodes **/
     atom_hash->node_buf = __atomic_hash_malloc_fn(hash_size * sizeof(struct __atomic_node_s));
@@ -126,9 +125,6 @@ __atomic_hash_init(size_t hash_size, atomic_hash_read_node_fn read_node_fn_, ato
     // Atomic Init
     atom_hash->accessing_counter = 0;
 
-    // atom_hash->is_maintaining = (atomic_flag)ATOMIC_FLAG_INIT;
-    atom_hash->resize = 1; // starting is 1
-
     // read function when get the obejct for secure copy
     atom_hash->read_node_fn = read_node_fn_;
     atom_hash->free_node_fn = free_node_fn_;
@@ -142,8 +138,7 @@ __atomic_hash_realloc_buffer_(__atomic_hash *atom_hash) {
     struct __atomic_node_s *old_node_buf = atom_hash->node_buf;
     size_t total_size = atom_hash->total_size;
     size_t new_total_size = atom_hash->total_size * 2;
-    int new_resize = atom_hash->resize * 2;
-    // printf("new resize = %d\n", new_resize);
+
     /** Pre-allocate all nodes **/
     struct __atomic_node_s *new_node_buf = __atomic_hash_malloc_fn(new_total_size * sizeof(struct __atomic_node_s));
 
@@ -155,15 +150,28 @@ __atomic_hash_realloc_buffer_(__atomic_hash *atom_hash) {
     for (size_t i = 0; i < new_total_size; i++)
         new_node_buf[i].key = NULL;
 
-    for (size_t index = 0; index < total_size; index++)
-        memcpy(new_node_buf + index * 2, atom_hash->node_buf + index, sizeof(struct __atomic_node_s));
+    atom_hash->total_size = new_total_size;
 
-//    new_node_buf[total_size - 1].next = new_node_buf + total_size;
 
-    // size_t i;
-    // for (i = 0; i < total_size; i++) {
-    //     new_node_buf[i].next = new_node_buf + i + 1;
-    // }
+
+
+    // Relocation the hash code index, to prevent this trigger often, Suggestion to init with big size of hashtable
+    for (size_t old_hash_index = 0; old_hash_index < total_size; old_hash_index++) {
+        if (atom_hash->node_buf[old_hash_index].used == 1) {
+            size_t new_hash_index = get_hash_index(atom_hash->node_buf[old_hash_index].key);
+            // Linear Probing Logic
+            while (new_node_buf[new_hash_index].key != NULL) {
+                new_hash_index++;
+                // wrap around
+                new_hash_index %= new_total_size;
+            }
+            memcpy(new_node_buf + new_hash_index, atom_hash->node_buf + old_hash_index, sizeof(struct __atomic_node_s));
+        }
+
+    }
+
+
+
     for (size_t i = 0; i < new_total_size; i++) {
         if (new_node_buf[i].key == NULL) {
             // new_node_buf[i].key = 0; // it is already set at above
@@ -179,13 +187,8 @@ __atomic_hash_realloc_buffer_(__atomic_hash *atom_hash) {
 
     atom_hash->node_buf = new_node_buf;
 
-    atom_hash->total_size = new_total_size;
-    atom_hash->resize = new_resize;
-
     //For Last Node refer to the first node
     atom_hash->node_buf[new_total_size - 1].next = atom_hash->node_buf;
-
-    // atomic_flag_clear_explicit(&atom_hash->is_maintaining, __ATOMIC_RELEASE);
 
     __atomic_hash_free_fn(old_node_buf);
 

@@ -38,11 +38,6 @@ typedef struct {
     // Handling realloc and destroy counter
     /*atomic__*/ int accessing_counter;
 
-    // resize for realloc purpose
-    int resize;
-    // For hash index
-    const size_t modulus_size;
-
     atomic_hash_read_node_fn read_node_fn;
     atomic_hash_free_node_fn free_node_fn;
 

@@ -43,7 +43,7 @@ int i ;
 
 void *myThreadFun(void *vargp)
 {
-    static int loop_index  = 0;
+    // static int loop_index  = 0;
 
     // if(loop_index < 100) {
     //     usleep(1000*200);
@@ -85,27 +85,27 @@ void *myThreadFun(void *vargp)
 
     free(str2);
 
-    s_st = (Object*) __atomic_hash_pop(my_hashtable, str);
-    if (s_st) {
+    // s_st = (Object*) __atomic_hash_pop(my_hashtable, str);
+    // if (s_st) {
 
-        // printf("%s\n", s_st->name);
-        // printf("%.*s\n", 11, s_st->name);
+    //     // printf("%s\n", s_st->name);
+    //     // printf("%.*s\n", 11, s_st->name);
 
-        // free(s_st->name);
-        free(s_st);
-    } else {
-        printf("%s\n", "nothing");
-    }
+    //     // free(s_st->name);
+    //     free(s_st);
+    // } else {
+    //     printf("%s\n", "nothing");
+    // }
 
 
     return NULL;
 }
 
 
-#define MAX_THREAD 300
+#define MAX_THREAD 5000
 
 int main(void) {
-    my_hashtable = __atomic_hash_init(2, readObject, freeObject);
+    my_hashtable = __atomic_hash_init(4000, readObject, freeObject);
     // atomic_key_name = ATOMIC_VAR_INIT(0);
 
     PRINT_SIZE(my_hashtable->total_size);
