@@ -15,7 +15,7 @@ typedef void (*atomic_hash_free_fn)(void*);
 typedef void *(*atomic_hash_read_node_fn)(void*);
 typedef void (*atomic_hash_free_node_fn)(void*);
 
-void init_malloc_free_hooker(atomic_hash_malloc_fn malloc_fun, atomic_hash_free_fn free_fun);
+void init_hash_malloc_free_hooker(atomic_hash_malloc_fn malloc_fun, atomic_hash_free_fn free_fun);
 
 typedef char* HashKey;
 

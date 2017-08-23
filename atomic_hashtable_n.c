@@ -25,7 +25,7 @@ static atomic_hash_n_free_fn __atomic_hash_n_free_fn = free;
 void __atomic_hash_n_check_add_slot_(__atomic_hash_n *atom_hash);
 
 void
-init_malloc_free_hooker(atomic_hash_n_malloc_fn malloc_fun, atomic_hash_n_free_fn free_fun) {
+init_hash_n_malloc_free_hooker(atomic_hash_n_malloc_fn malloc_fun, atomic_hash_n_free_fn free_fun) {
     __atomic_hash_n_malloc_fn = malloc_fun;
     __atomic_hash_n_free_fn = free_fun;
 }

@@ -27,7 +27,7 @@ static atomic_hash_malloc_fn __atomic_hash_malloc_fn = malloc;
 static atomic_hash_free_fn __atomic_hash_free_fn = free;
 
 void 
-init_malloc_free_hooker(atomic_hash_malloc_fn malloc_fun, atomic_hash_free_fn free_fun) {
+init_hash_malloc_free_hooker(atomic_hash_malloc_fn malloc_fun, atomic_hash_free_fn free_fun) {
     __atomic_hash_malloc_fn = malloc_fun;
     __atomic_hash_free_fn = free_fun;
 }
