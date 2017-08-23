@@ -98,7 +98,7 @@ void *myThreadFun(void *vargp)
 #define MAX_THREAD 5000
 
 int main(void) {
-    my_hashtable = __atomic_hash_n_init(2, readObject, freeObject);
+    my_hashtable = __atomic_hash_n_init(4000, readObject, freeObject);
     // atomic_key_name = ATOMIC_VAR_INIT(0);
 
     PRINT_SIZE(my_hashtable->total_size);

@@ -21,7 +21,7 @@ static unsigned long hash(unsigned char *str);
 
 #define get_hash_index(s) hash((unsigned char*)s)%atom_hash->total_size
 
-void add_one_(__atomic_hash *atom_hash);
+void __atomic_hash_check_add_slot_(__atomic_hash *atom_hash);
 
 static atomic_hash_malloc_fn __atomic_hash_malloc_fn = malloc;
 static atomic_hash_free_fn __atomic_hash_free_fn = free;
@@ -200,7 +200,7 @@ __atomic_hash_realloc_buffer_(__atomic_hash *atom_hash) {
 }
 
 void
-add_one_(__atomic_hash *atom_hash) {
+__atomic_hash_check_add_slot_(__atomic_hash *atom_hash) {
     if (__atomic_fetch_add(&atom_hash->size, 1, __ATOMIC_ACQUIRE) >= atom_hash->total_size) {
         int replace_val = -1,
             expected_val = 0;
@@ -230,7 +230,7 @@ __atomic_hash_put(__atomic_hash *atom_hash, HashKey key_, void *value) {
     size_t keyLen = strlen(key_);
     size_t size_of_key_with_padding = (keyLen + 1) * sizeof(char);
 
-    add_one_(atom_hash);
+    __atomic_hash_check_add_slot_(atom_hash);
 
     while (__atomic_fetch_add(&atom_hash->accessing_counter, 2, __ATOMIC_ACQUIRE) % 2 != 0 ) {
         __atomic_fetch_sub(&atom_hash->accessing_counter, 2,  __ATOMIC_RELEASE);
@@ -260,7 +260,7 @@ __atomic_hash_replace(__atomic_hash *atom_hash, HashKey key_, void *value) {
     size_t total_size = atom_hash->total_size;
     void *found = NULL;
 
-    add_one_(atom_hash);
+    __atomic_hash_check_add_slot_(atom_hash);
 
     while (__atomic_fetch_add(&atom_hash->accessing_counter, 2, __ATOMIC_ACQUIRE) % 2 != 0 ) {
         __atomic_fetch_sub(&atom_hash->accessing_counter, 2,  __ATOMIC_RELEASE);

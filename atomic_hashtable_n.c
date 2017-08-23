@@ -22,7 +22,7 @@ int __atomic_hash_n_realloc_buffer_(__atomic_hash_n *atom_hash);
 static atomic_hash_n_malloc_fn __atomic_hash_n_malloc_fn = malloc;
 static atomic_hash_n_free_fn __atomic_hash_n_free_fn = free;
 
-void add_one_(__atomic_hash_n *atom_hash);
+void __atomic_hash_n_check_add_slot_(__atomic_hash_n *atom_hash);
 
 void
 init_malloc_free_hooker(atomic_hash_n_malloc_fn malloc_fun, atomic_hash_n_free_fn free_fun) {
@@ -193,7 +193,7 @@ __atomic_hash_n_realloc_buffer_(__atomic_hash_n *atom_hash) {
 }
 
 void
-add_one_(__atomic_hash_n *atom_hash) {
+__atomic_hash_n_check_add_slot_(__atomic_hash_n *atom_hash) {
     if (__atomic_fetch_add(&atom_hash->size, 1, __ATOMIC_ACQUIRE) >= atom_hash->total_size) {
         int replace_val = -1,
             expected_val = 0;
@@ -221,7 +221,7 @@ int
 __atomic_hash_n_put(__atomic_hash_n *atom_hash, atom_NumKey key_, void *value) {
     int success = 0;
 
-    add_one_(atom_hash);
+    __atomic_hash_n_check_add_slot_(atom_hash);
 
     while (__atomic_fetch_add(&atom_hash->accessing_counter, 2, __ATOMIC_ACQUIRE) % 2 != 0 ) {
         __atomic_fetch_sub(&atom_hash->accessing_counter, 2,  __ATOMIC_RELEASE);
@@ -247,7 +247,7 @@ __atomic_hash_n_replace(__atomic_hash_n *atom_hash, atom_NumKey key_, void *valu
     size_t total_size = atom_hash->total_size;
     void *found = NULL;
 
-    add_one_(atom_hash);
+    __atomic_hash_n_check_add_slot_(atom_hash);
 
     while (__atomic_fetch_add(&atom_hash->accessing_counter, 2, __ATOMIC_ACQUIRE) % 2 != 0 ) {
         __atomic_fetch_sub(&atom_hash->accessing_counter, 2,  __ATOMIC_RELEASE);
