@@ -1,6 +1,9 @@
 # atomic_hashtable
 Fast movement for free and writeable, and read without locking while multithreading purposes
 
+## atomic_hashtable for string key
+## atomic_hashtable_n for integer key
+
 ### How does atomic_hashtable work?
 - it is traveling around the buffer(s), each buffer has it own metadata for atomic counter of read and write permission without affecting other buffer's transaction. Meanwhile, all buffer are controlled by parent to own an accessing atomic counter in order to controlled the memory relocation only. 
 
