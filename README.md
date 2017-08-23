@@ -55,7 +55,7 @@ Fast movement for free and writeable, and read without locking while multithread
 
 
 ### What is pre-allocated value in the readme
-* it means the value must allocated memory before push. The buffer will keeping the same value until you pop out.
+* it means the value must allocate memory before put into the hashtable. The buffer will keeping the same value until you pop out and free it
 
 
 ### what is atomic_hash_read_node_fn in the readme
@@ -63,7 +63,7 @@ Fast movement for free and writeable, and read without locking while multithread
 * see test_main.c for example.
 
 ### what is atomic_hash_free_node_fn in the readme
-* it mainly for __atomic_hash_destroy function, it will iterate the buffer and trigger the atomic_hash_free_node_fn when destroying the node.
+* it mainly for __atomic_hash_destroy function, it will iterate the buffer and trigger the atomic_hash_free_node_fn when destroying the node if any remaining memory inside.
 * see test_main.c for example. 
 
 ### Simple Right?! Enjoy your lock free travelling!!
