@@ -21,6 +21,7 @@ static unsigned long hash(unsigned char *str);
 
 #define get_hash_index(s) hash((unsigned char*)s)%atom_hash->total_size
 
+void add_one_(__atomic_hash *atom_hash);
 
 static atomic_hash_malloc_fn __atomic_hash_malloc_fn = malloc;
 static atomic_hash_free_fn __atomic_hash_free_fn = free;
@@ -415,7 +416,7 @@ __atomic_hash_destroy(__atomic_hash *atom_hash) {
 
             if (atom_hash->free_node_fn)
                 atom_hash->free_node_fn(buffer->val);
-            else __atomic_hash_free_fn(buffer->val);
+            // else __atomic_hash_free_fn(buffer->val);
         }
         buffer = buffer->next;
     }
