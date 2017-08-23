@@ -43,6 +43,12 @@ Fast movement for free and writeable, and read without locking while multithread
 * arg1=the key in string
 * return pop out pre-allocated value if found, else return NULL 
 
+###### void* __atomic_hash_get(__atomic_hash *, HashKey );
+* arg0=The name hashtable
+* arg1=the key in string
+* return reference value if found, else return NULL 
+* reference pointer from the hashtable, it is not recommended for concurrent write while other thread is free the field value, instead, should use read
+
 ###### void* __atomic_hash_read(__atomic_hash *, HashKey );
 * arg0=The name hashtable
 * arg1=the key in string
