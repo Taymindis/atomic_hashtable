@@ -100,7 +100,7 @@ __atomic_hash_n_init(size_t hash_size, atomic_hash_n_read_node_fn read_node_fn_,
         return 0;
     }
 
-    size_t i = 0;
+    size_t i;
     for (i = 0; i < hash_size; i++) {
         atom_hash->node_buf[i].key = 0;
         // atom_hash->node_buf[i].key_len = 0;
@@ -136,7 +136,7 @@ __atomic_hash_n_realloc_buffer_(__atomic_hash_n *atom_hash) {
 
     struct __atomic_node_n *old_node_buf = atom_hash->node_buf;
     size_t total_size = atom_hash->total_size;
-    size_t new_total_size = atom_hash->total_size * 2;
+    size_t new_total_size = atom_hash->total_size * 2, i, old_hash_index;
     
     /** Pre-allocate all nodes **/
     struct __atomic_node_n *new_node_buf = __atomic_hash_n_malloc_fn(new_total_size * sizeof(struct __atomic_node_n));
@@ -146,7 +146,7 @@ __atomic_hash_n_realloc_buffer_(__atomic_hash_n *atom_hash) {
         return 0; // no more memory
     }
 
-    for (size_t i = 0; i < new_total_size; i++) {
+    for (i = 0; i < new_total_size; i++) {
         new_node_buf[i].used = 0;
     }
 
@@ -154,7 +154,7 @@ __atomic_hash_n_realloc_buffer_(__atomic_hash_n *atom_hash) {
     atom_hash->total_size = new_total_size;
 
 
-    for (size_t old_hash_index = 0; old_hash_index < total_size; old_hash_index++) {
+    for (old_hash_index = 0; old_hash_index < total_size; old_hash_index++) {
         if (atom_hash->node_buf[old_hash_index].used == 1) {
             size_t new_hash_index = get_hash_index(atom_hash->node_buf[old_hash_index].key);
             // Linear Probing Logic
@@ -168,7 +168,7 @@ __atomic_hash_n_realloc_buffer_(__atomic_hash_n *atom_hash) {
 
     }
 
-    for (size_t i = 0; i < new_total_size; i++) {
+    for (i = 0; i < new_total_size; i++) {
         if (new_node_buf[i].used == 0) {
             new_node_buf[i].key = 0;
             // new_node_buf[i].key_len = 0;
@@ -244,7 +244,7 @@ __atomic_hash_n_put(__atomic_hash_n *atom_hash, atom_NumKey key_, void *value) {
 
 void*
 __atomic_hash_n_replace(__atomic_hash_n *atom_hash, atom_NumKey key_, void *value) {
-    size_t total_size = atom_hash->total_size;
+    size_t total_size = atom_hash->total_size, i;
     void *found = NULL;
 
     __atomic_hash_n_check_add_slot_(atom_hash);
@@ -255,7 +255,7 @@ __atomic_hash_n_replace(__atomic_hash_n *atom_hash, atom_NumKey key_, void *valu
 
     struct __atomic_node_n *buffer = atom_hash->node_buf + (get_hash_index(key_));
 
-    for (size_t i = 0; i < total_size ; i++) {
+    for (i = 0; i < total_size ; i++) {
         // Use even number to prevent conflict issue with pop, even number means popable
         if (__atomic_fetch_add(&buffer->reading_counter, 2, __ATOMIC_ACQUIRE) % 2 == 0 &&
                 buffer->used == 1 && key_ == buffer->key)
@@ -303,7 +303,7 @@ SUCCESS:
 void*
 __atomic_hash_n_pop(__atomic_hash_n *atom_hash, atom_NumKey key_) {
     void * return_ = NULL;
-    size_t total_size = atom_hash->total_size;
+    size_t total_size = atom_hash->total_size, i;
 
     while (__atomic_fetch_add(&atom_hash->accessing_counter, 2, __ATOMIC_ACQUIRE) % 2 != 0 ) {
         __atomic_fetch_sub(&atom_hash->accessing_counter, 2,  __ATOMIC_RELEASE);
@@ -311,7 +311,7 @@ __atomic_hash_n_pop(__atomic_hash_n *atom_hash, atom_NumKey key_) {
 
     struct __atomic_node_n *buffer = atom_hash->node_buf + (get_hash_index(key_));
 
-    for (size_t i = 0; i < total_size ; i++) {
+    for (i = 0; i < total_size ; i++) {
         if (__atomic_fetch_add(&buffer->reading_counter, 2, __ATOMIC_ACQUIRE) % 2 == 0 &&
                 buffer->used == 1 && key_ == buffer->key)
             goto SUCCESS;
@@ -352,7 +352,7 @@ while other thread is free the field value, should use read **/
 void*
 __atomic_hash_n_get(__atomic_hash_n *atom_hash, atom_NumKey key_) {
     void * return_ = NULL;
-    size_t total_size = atom_hash->total_size;
+    size_t total_size = atom_hash->total_size, i;
 
     while (__atomic_fetch_add(&atom_hash->accessing_counter, 2, __ATOMIC_ACQUIRE) % 2 != 0 ) {
         __atomic_fetch_sub(&atom_hash->accessing_counter, 2,  __ATOMIC_RELEASE);
@@ -360,7 +360,7 @@ __atomic_hash_n_get(__atomic_hash_n *atom_hash, atom_NumKey key_) {
 
     struct __atomic_node_n *buffer = atom_hash->node_buf + (get_hash_index(key_));
 
-    for (size_t i = 0; i < total_size ; i++) {
+    for (i = 0; i < total_size ; i++) {
         // Use even number to prevent conflict issue with pop, even number means popable
         if (__atomic_fetch_add(&buffer->reading_counter, 2, __ATOMIC_ACQUIRE) % 2 == 0 &&
                 buffer->used == 1 && key_ == buffer->key) {
@@ -383,7 +383,7 @@ SUCCESS:
 void*
 __atomic_hash_n_read(__atomic_hash_n *atom_hash, atom_NumKey key_) {
     void * return_ = NULL;
-    size_t total_size = atom_hash->total_size;
+    size_t total_size = atom_hash->total_size, i;
 
     while (__atomic_fetch_add(&atom_hash->accessing_counter, 2, __ATOMIC_ACQUIRE) % 2 != 0 ) {
         __atomic_fetch_sub(&atom_hash->accessing_counter, 2,  __ATOMIC_RELEASE);
@@ -391,7 +391,7 @@ __atomic_hash_n_read(__atomic_hash_n *atom_hash, atom_NumKey key_) {
 
     struct __atomic_node_n *buffer = atom_hash->node_buf + (get_hash_index(key_));
 
-    for (size_t i = 0; i < total_size ; i++) {
+    for (i = 0; i < total_size ; i++) {
         // Use even number to prevent conflict issue with pop, even number means popable
         if (__atomic_fetch_add(&buffer->reading_counter, 2, __ATOMIC_ACQUIRE) % 2 == 0 &&
                 buffer->used == 1 && key_ == buffer->key) {
@@ -415,7 +415,7 @@ void
 __atomic_hash_n_destroy(__atomic_hash_n *atom_hash) {
     int replace_val = -1;
     int expected_val = 0;
-    size_t total_size = atom_hash->total_size;
+    size_t total_size = atom_hash->total_size, i;
 
 
     // means spinning lock for reading counter
@@ -427,7 +427,7 @@ __atomic_hash_n_destroy(__atomic_hash_n *atom_hash) {
     struct __atomic_node_n *buffer = atom_hash->node_buf;
 
 
-    for (size_t i = 0; i < total_size ; i++) {
+    for (i = 0; i < total_size ; i++) {
         if (buffer->used) {
             buffer->key = 0;
             if (atom_hash->free_node_fn)
